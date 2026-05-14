@@ -1,0 +1,8 @@
+venv/
+.conda/
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env

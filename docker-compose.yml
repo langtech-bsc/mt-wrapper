@@ -1,0 +1,17 @@
+services:
+  mt-adapter:
+    image: ghcr.io/langtech-bsc/mt-wrapper:latest
+    ports:
+      - "8000:80"
+    environment:
+      # URL to the SalamandraTA OpenAI-compatible endpoint
+      - SALAMANDRA_URL=${SALAMANDRA_URL:-http://localhost:8000/v1}
+      # Model identifier
+      - SALAMANDRA_MODEL=${SALAMANDRA_MODEL:-BSC-LT/salamandraTA-7b-instruct}
+      # Optional API key for the endpoint
+      - SALAMANDRA_API_KEY=${SALAMANDRA_API_KEY:-}
+    healthcheck:
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:80/health')\" || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
