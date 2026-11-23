@@ -10,6 +10,10 @@ The adapter provides compatibility layers for standard translation APIs, allowin
 - **DeepL API v2** (`/v2/translate`)
 - **Custom API** (`/api/v1/post-edit`, `/api/v1/grammar-check`)
 
+## Language codes
+
+SalamandraTA is prompted with English language *names*. The adapter therefore converts the codes sent by Google Translate / DeepL clients (`es`, `CA`, `EN-GB`, `pt-BR`, `zh-Hans`, `nb`, ...) into names (`Spanish`, `Catalan`, `English`, `Portuguese`, `Chinese`, `Norwegian Bokmål`) before building the prompt; see `app/languages.py`. Values that are not a known code (e.g. `Catalan`) are passed through unchanged. If no source language is given, the model is told the source is "Unknown".
+
 ## Environment Variables
 
 The service is configured using the following environment variables (which can also be provided via a `.env` file):
@@ -56,3 +60,7 @@ Ensure you have Python 3.11+ installed.
 ## Architecture
 
 The application is built with **FastAPI** and uses **HTTPX** for asynchronous requests to the underlying LLM backend. It translates the payload expected by each respective API into a simple prompt specifically designed for the model to execute translation, post-editing, or grammar-checking tasks.
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE).

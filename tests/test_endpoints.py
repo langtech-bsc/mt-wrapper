@@ -83,3 +83,31 @@ def test_custom_grammar_check(mock_call_llm):
     assert response.status_code == 200
     data = response.json()
     assert data["corrected_text"] == "I am going to the store."
+
+
+from app.languages import language_name
+
+@pytest.mark.parametrize("code,name", [
+    ("ca", "Catalan"), ("CA", "Catalan"), ("es", "Spanish"), ("EN-GB", "English"),
+    ("pt-BR", "Portuguese"), ("PT-PT", "Portuguese"), ("nb", "Norwegian Bokmål"),
+    ("zh-Hans", "Chinese"), ("ca-valencia", "Valencian"),
+    ("Catalan", "Catalan"), ("Klingon", "Klingon"),
+])
+def test_language_name(code, name):
+    assert language_name(code) == name
+
+def test_language_name_none():
+    assert language_name(None) is None
+
+@patch("app.llm._call_llm", new_callable=AsyncMock)
+def test_prompt_uses_language_names(mock_call_llm):
+    mock_call_llm.return_value = "Bon dia"
+    client.post("/v2/translate", json={"text": ["Buenos días"], "source_lang": "ES", "target_lang": "CA"})
+    prompt = mock_call_llm.call_args[0][0]
+    assert prompt == "Translate the following text from Spanish into Catalan.\nSpanish: Buenos días\nCatalan:"
+
+@patch("app.llm._call_llm", new_callable=AsyncMock)
+def test_prompt_without_source_and_name_passthrough(mock_call_llm):
+    mock_call_llm.return_value = "Hello"
+    client.post("/language/translate/v2", json={"q": "Hola", "target": "English"})
+    assert mock_call_llm.call_args[0][0].startswith("Translate the following text from Unknown into English.")
