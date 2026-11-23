@@ -2,6 +2,7 @@ import httpx
 from pydantic import BaseModel
 from typing import List, Optional
 from .config import settings
+from .languages import language_name
 
 class ChatMessage(BaseModel):
     role: str
@@ -47,15 +48,18 @@ async def _call_llm(text_prompt: str) -> str:
             raise
 
 async def translate_text(text: str, source_lang: Optional[str], target_lang: str) -> str:
-    source_str = source_lang if source_lang else "Unknown"
+    source_str = language_name(source_lang) or "Unknown"
+    target_lang = language_name(target_lang)
     prompt = f"Translate the following text from {source_str} into {target_lang}.\n{source_str}: {text}\n{target_lang}:"
     return await _call_llm(prompt)
 
 async def post_edit_text(source_text: str, translation: str, source_lang: Optional[str], target_lang: str) -> str:
-    source_str = source_lang if source_lang else "Unknown"
+    source_str = language_name(source_lang) or "Unknown"
+    target_lang = language_name(target_lang)
     prompt = f"Please fix any mistakes in the following {source_str}-{target_lang} machine translation or keep it unedited if it's correct.\nSource: {source_text}\nMT: {translation}\nCorrected:"
     return await _call_llm(prompt)
 
 async def grammar_check_text(text: str, lang: str) -> str:
+    lang = language_name(lang)
     prompt = f"Please fix any mistakes in the following {lang} sentence or keep it unedited if it's correct.\nSentence: {text}\nCorrected:"
     return await _call_llm(prompt)
